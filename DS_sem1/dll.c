@@ -10,7 +10,6 @@ struct node {
 struct node *head = NULL;
 struct node *head2 = NULL;
 
-/* Insert at beginning */
 void insertFirst(int value, int ll) {
     struct node *new_node = (struct node *)malloc(sizeof(struct node));
     if (new_node == NULL) {
@@ -39,7 +38,6 @@ void insertFirst(int value, int ll) {
     }
 }
 
-/* Insert at end */
 void insertEnd(int value, int ll) {
     struct node *new_node = (struct node *)malloc(sizeof(struct node));
     if (new_node == NULL) {
@@ -84,7 +82,6 @@ void insertEnd(int value, int ll) {
     }
 }
 
-/* Insert at position */
 void insertAtpos(int value, int pos, int ll) {
     if (pos <= 0) {
         printf("Invalid position\n");
@@ -129,7 +126,6 @@ void insertAtpos(int value, int pos, int ll) {
     temp->next = new_node;
 }
 
-/* Delete first node */
 void deleteFirst(int ll) {
     if (ll == 1) {
         if (head == NULL) return;
@@ -150,7 +146,6 @@ void deleteFirst(int ll) {
 }
 
 
-/* Delete last node */
 void deleteEnd(int ll) {
     struct node *temp = (ll == 1) ? head : head2;
 
@@ -176,7 +171,6 @@ void deleteEnd(int ll) {
     free(temp);
 }
 
-/* Delete at position */
 void deleteAtpos(int pos, int ll) {
     if (pos <= 0) {
         printf("Invalid position\n");
@@ -207,7 +201,6 @@ void deleteAtpos(int pos, int ll) {
     free(temp);
 }
 
-/* Search */
 void search(int value, int ll) {
     struct node *temp = (ll == 1) ? head : head2;
 
@@ -230,7 +223,6 @@ void search(int value, int ll) {
         printf("Element not found\n");
 }
 
-/* Display */
 void display(int ll) {
     struct node *temp = (ll == 1) ? head : head2;
 
@@ -247,7 +239,6 @@ void display(int ll) {
     printf("\n");
 }
 
-/* Merge list 2 into list 1 */
 void merge() {
     if (head == NULL) {
         head = head2;
@@ -267,7 +258,6 @@ void merge() {
     head2 = NULL;
 }
 
-/* Main */
 int main() {
     int op, value, pos, ll;
 
