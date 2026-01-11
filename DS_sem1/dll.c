@@ -7,235 +7,314 @@ struct node {
     struct node *next;
 };
 
-struct node *head1 = NULL;
+struct node *head = NULL;
 struct node *head2 = NULL;
 
-void insertEnd(struct node **head_ref, int value) {
-    struct node *newnode = (struct node*)malloc(sizeof(struct node));
-    newnode->data = value;
-    newnode->next = NULL;
-    newnode->prev = NULL;
-
-    if (*head_ref == NULL) {
-        *head_ref = newnode;
-    } else {
-        struct node *temp = *head_ref;
-        while (temp->next != NULL)
-            temp = temp->next;
-        temp->next = newnode;
-        newnode->prev = temp;
-    }
-}
-
-void insertBeginning(struct node **head_ref, int value) {
-    struct node *newnode = (struct node*)malloc(sizeof(struct node));
-    newnode->data = value;
-    newnode->prev = NULL;
-    newnode->next = *head_ref;
-
-    if (*head_ref != NULL)
-        (*head_ref)->prev = newnode;
-
-    *head_ref = newnode;
-}
-
-void insertPosition(struct node **head_ref, int position, int value) {
-    struct node *newnode = (struct node*)malloc(sizeof(struct node));
-    newnode->data = value;
-    newnode->next = NULL;
-    newnode->prev = NULL;
-
-    if (*head_ref == NULL || position <= 1) {
-        insertBeginning(head_ref, value);
+/* Insert at beginning */
+void insertFirst(int value, int ll) {
+    struct node *new_node = (struct node *)malloc(sizeof(struct node));
+    if (new_node == NULL) {
+        printf("Memory allocation failed\n");
         return;
     }
 
-    struct node *temp = *head_ref;
-    int i = 1;
-    while (i < position - 1 && temp->next != NULL) {
-        temp = temp->next;
-        i++;
+    new_node->data = value;
+    new_node->prev = NULL;
+
+    if (ll == 1) {
+        new_node->next = head;
+        if (head != NULL)
+            head->prev = new_node;
+        head = new_node;
+    } 
+    else if (ll == 2) {
+        new_node->next = head2;
+        if (head2 != NULL)
+            head2->prev = new_node;
+        head2 = new_node;
+    } 
+    else {
+        printf("Invalid linked list\n");
+        free(new_node);
     }
-
-    newnode->next = temp->next;
-    newnode->prev = temp;
-
-    if (temp->next != NULL)
-        temp->next->prev = newnode;
-
-    temp->next = newnode;
 }
 
-void deleteData(struct node **head_ref, int value) {
-    struct node *temp = *head_ref;
+/* Insert at end */
+void insertEnd(int value, int ll) {
+    struct node *new_node = (struct node *)malloc(sizeof(struct node));
+    if (new_node == NULL) {
+        printf("Memory allocation failed\n");
+        return;
+    }
 
-    while (temp != NULL && temp->data != value)
+    new_node->data = value;
+    new_node->next = NULL;
+
+    if (ll == 1) {
+        if (head == NULL) {
+            new_node->prev = NULL;
+            head = new_node;
+            return;
+        }
+
+        struct node *temp = head;
+        while (temp->next != NULL)
+            temp = temp->next;
+
+        temp->next = new_node;
+        new_node->prev = temp;
+    } 
+    else if (ll == 2) {
+        if (head2 == NULL) {
+            new_node->prev = NULL;
+            head2 = new_node;
+            return;
+        }
+
+        struct node *temp = head2;
+        while (temp->next != NULL)
+            temp = temp->next;
+
+        temp->next = new_node;
+        new_node->prev = temp;
+    } 
+    else {
+        printf("Invalid linked list\n");
+        free(new_node);
+    }
+}
+
+/* Insert at position */
+void insertAtpos(int value, int pos, int ll) {
+    if (pos <= 0) {
+        printf("Invalid position\n");
+        return;
+    }
+
+    if (pos == 1) {
+        insertFirst(value, ll);
+        return;
+    }
+
+    struct node *new_node = (struct node *)malloc(sizeof(struct node));
+    if (new_node == NULL) {
+        printf("Memory allocation failed\n");
+        return;
+    }
+
+    new_node->data = value;
+
+    struct node *temp = (ll == 1) ? head : head2;
+    if (temp == NULL) {
+        printf("Position out of range\n");
+        free(new_node);
+        return;
+    }
+
+    for (int i = 1; i < pos - 1 && temp != NULL; i++)
         temp = temp->next;
 
     if (temp == NULL) {
-        printf("Data not found\n");
+        printf("Position out of range\n");
+        free(new_node);
         return;
     }
 
-    if (temp->prev != NULL)
-        temp->prev->next = temp->next;
-    else
-        *head_ref = temp->next;
+    new_node->next = temp->next;
+    new_node->prev = temp;
 
     if (temp->next != NULL)
-        temp->next->prev = temp->prev;
+        temp->next->prev = new_node;
 
-    printf("%d deleted\n", temp->data);
-    free(temp);
+    temp->next = new_node;
 }
 
-void deleteBeginning(struct node **head_ref) {
-    if (*head_ref == NULL) {
-        printf("Empty\n");
-        return;
-    }
-
-    struct node *temp = *head_ref;
-    *head_ref = temp->next;
-
-    if (*head_ref != NULL)
-        (*head_ref)->prev = NULL;
-
-    printf("%d deleted\n", temp->data);
-    free(temp);
-}
-
-void deleteEnd(struct node **head_ref) {
-    if (*head_ref == NULL) {
-        printf("Empty\n");
-        return;
-    }
-
-    struct node *temp = *head_ref;
-    while (temp->next != NULL)
-        temp = temp->next;
-
-    if (temp->prev != NULL)
-        temp->prev->next = NULL;
-    else
-        *head_ref = NULL;
-
-    printf("%d deleted\n", temp->data);
-    free(temp);
-}
-
-void search(struct node *head, int value) {
-    int i = 1;
-    while (head != NULL) {
-        if (head->data == value) {
-            printf("%d is found at node %d\n", value, i);
-            return;
-        }
+/* Delete first node */
+void deleteFirst(int ll) {
+    if (ll == 1) {
+        if (head == NULL) return;
+        struct node *temp = head;
         head = head->next;
-        i++;
+        if (head != NULL)
+            head->prev = NULL;
+        free(temp);
+    } 
+    else if (ll == 2) {
+        if (head2 == NULL) return;
+        struct node *temp = head2;
+        head2 = head2->next;
+        if (head2 != NULL)
+            head2->prev = NULL;
+        free(temp);
     }
-    printf("%d not found\n", value);
 }
 
-void printList(struct node *head) {
-    if (head == NULL) {
+
+/* Delete last node */
+void deleteEnd(int ll) {
+    struct node *temp = (ll == 1) ? head : head2;
+
+    if (temp == NULL) {
         printf("List is empty\n");
         return;
     }
 
-    while (head != NULL) {
-        printf("%d ", head->data);
-        head = head->next;
+    if (temp->next == NULL) {
+        if (ll == 1)
+            head = NULL;
+        else
+            head2 = NULL;
+
+        free(temp);
+        return;
+    }
+
+    while (temp->next != NULL)
+        temp = temp->next;
+
+    temp->prev->next = NULL;
+    free(temp);
+}
+
+/* Delete at position */
+void deleteAtpos(int pos, int ll) {
+    if (pos <= 0) {
+        printf("Invalid position\n");
+        return;
+    }
+
+    if (pos == 1) {
+        deleteFirst(ll);
+        return;
+    }
+
+    struct node *temp = (ll == 1) ? head : head2;
+
+    for (int i = 1; i < pos && temp != NULL; i++)
+        temp = temp->next;
+
+    if (temp == NULL) {
+        printf("Position out of range\n");
+        return;
+    }
+
+    if (temp->next != NULL)
+        temp->next->prev = temp->prev;
+
+    if (temp->prev != NULL)
+        temp->prev->next = temp->next;
+
+    free(temp);
+}
+
+/* Search */
+void search(int value, int ll) {
+    struct node *temp = (ll == 1) ? head : head2;
+
+    if (temp == NULL) {
+        printf("List is empty\n");
+        return;
+    }
+
+    int pos = 1, found = 0;
+    while (temp != NULL) {
+        if (temp->data == value) {
+            printf("Element %d found at position %d\n", value, pos);
+            found = 1;
+        }
+        temp = temp->next;
+        pos++;
+    }
+
+    if (!found)
+        printf("Element not found\n");
+}
+
+/* Display */
+void display(int ll) {
+    struct node *temp = (ll == 1) ? head : head2;
+
+    if (temp == NULL) {
+        printf("List is empty\n");
+        return;
+    }
+
+    printf("Linked List %d: ", ll);
+    while (temp != NULL) {
+        printf("%d ", temp->data);
+        temp = temp->next;
     }
     printf("\n");
 }
 
-void mergeLists() {
-    if (head1 == NULL) {
-        head1 = head2;
-    } else {
-        struct node *temp = head1;
-        while (temp->next != NULL)
-            temp = temp->next;
-        temp->next = head2;
-        if (head2 != NULL)
-            head2->prev = temp;
+/* Merge list 2 into list 1 */
+void merge() {
+    if (head == NULL) {
+        head = head2;
+        head2 = NULL;
+        return;
     }
+
+    if (head2 == NULL)
+        return;
+
+    struct node *temp = head;
+    while (temp->next != NULL)
+        temp = temp->next;
+
+    temp->next = head2;
+    head2->prev = temp;
     head2 = NULL;
-    printf("Lists merged successfully.\n");
 }
 
+/* Main */
 int main() {
-    int op, value, position, list_choice;
-    struct node **current_list;
+    int op, value, pos, ll;
 
     while (1) {
-        printf("\n--- MENU ---\n");
-        printf("1. Insert at end\n");
-        printf("2. Insert at beginning\n");
-        printf("3. Insert at position\n");
-        printf("4. Delete by value\n");
-        printf("5. Delete beginning\n");
-        printf("6. Delete end\n");
-        printf("7. Display list\n");
-        printf("8. Search\n");
-        printf("9. Merge list 2 into list 1\n");
-        printf("10. Exit\n");
+        printf("\n1.Insert at beginning\n2.Insert at end\n3.Insert at position");
+        printf("\n4.Delete first\n5.Delete last\n6.Delete at position");
+        printf("\n7.Search\n8.Display\n9.Merge\n10.Exit\n");
         printf("Choose operation: ");
         scanf("%d", &op);
 
-        if (op >= 1 && op <= 8) {
-            printf("Choose list (1 or 2): ");
-            scanf("%d", &list_choice);
-            current_list = (list_choice == 1) ? &head1 : (list_choice == 2) ? &head2 : NULL;
-            if (current_list == NULL) {
-                printf("Invalid list\n");
-                continue;
-            }
-        }
-
         switch (op) {
             case 1:
-                printf("Enter value: ");
-                scanf("%d", &value);
-                insertEnd(current_list, value);
+                scanf("%d %d", &ll, &value);
+                insertFirst(value, ll);
                 break;
             case 2:
-                printf("Enter value: ");
-                scanf("%d", &value);
-                insertBeginning(current_list, value);
+                scanf("%d %d", &ll, &value);
+                insertEnd(value, ll);
                 break;
             case 3:
-                printf("Enter value: ");
-                scanf("%d", &value);
-                printf("Enter position: ");
-                scanf("%d", &position);
-                insertPosition(current_list, position, value);
+                scanf("%d %d %d", &ll, &value, &pos);
+                insertAtpos(value, pos, ll);
                 break;
             case 4:
-                printf("Enter value to delete: ");
-                scanf("%d", &value);
-                deleteData(current_list, value);
+                scanf("%d", &ll);
+                deleteFirst(ll);
                 break;
             case 5:
-                deleteBeginning(current_list);
+                scanf("%d", &ll);
+                deleteEnd(ll);
                 break;
             case 6:
-                deleteEnd(current_list);
+                scanf("%d %d", &ll, &pos);
+                deleteAtpos(pos, ll);
                 break;
             case 7:
-                printList(*current_list);
+                scanf("%d %d", &ll, &value);
+                search(value, ll);
                 break;
             case 8:
-                printf("Enter value to search: ");
-                scanf("%d", &value);
-                search(*current_list, value);
+                scanf("%d", &ll);
+                display(ll);
                 break;
             case 9:
-                mergeLists();
+                merge();
                 break;
             case 10:
-                printf("Exiting...\n");
                 return 0;
             default:
                 printf("Invalid option\n");
